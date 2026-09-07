@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "VideoScope",
+  "version": "0.1.0",
+  "description": "Search Bilibili and YouTube by descriptions, visual scenes, and spoken keywords.",
+  "permissions": [],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
+}
