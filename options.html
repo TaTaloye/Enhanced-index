@@ -5,19 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#002fa7" />
-    <title>Enhanced index · 欢迎</title>
+    <title data-i18n="pageTitle">Enhanced index · 欢迎</title>
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
-    <a class="skip-link" href="#main">跳到主要内容</a>
+    <a class="skip-link" href="#main" data-i18n="skipToMain">跳到主要内容</a>
 
-    <header class="site-header" aria-label="页面标题栏">
-      <a class="brand" href="#top" aria-label="Enhanced index 首页">
+    <header class="site-header" aria-label="页面标题栏" data-i18n-aria-label="headerLabel">
+      <a class="brand" href="#top" aria-label="Enhanced index 首页" data-i18n-aria-label="brandHomeLabel">
         <span class="brand-mark" aria-hidden="true">
           <span></span><span></span><span></span>
         </span>
-        <span class="brand-name">Enhanced index</span>
+        <span class="brand-name" data-i18n="brandName">Enhanced index</span>
       </a>
+      <div class="language-switch" role="group" aria-label="界面语言" data-i18n-aria-label="languageSwitchLabel">
+        <button class="option-language" type="button" data-language="zh-CN" data-i18n="languageChinese" aria-pressed="true">
+        中文
+        </button>
+        <button class="option-language" type="button" data-language="en" data-i18n="languageEnglish" aria-pressed="false">
+        English
+        </button>
+      </div>
     </header>
 
     <main id="main">
@@ -26,25 +34,24 @@
         <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
 
         <div class="hero-copy">
-          <p class="eyebrow"><span>01</span> 感谢使用</p>
+          <p class="eyebrow" data-i18n="thanksForUsing"> 感谢使用</p>
           <h1 id="welcome-title">
-            不只搜标题，<br />
-            <span class="accent-text">开始搜索视频本身</span>
+            <span data-i18n="heroTitle">不只搜标题</span><br />
+
           </h1>
-          <p class="hero-description">
-            Enhanced index 将描述、画面与视频中的关键词带入 Bilibili 和 YouTube
-            搜索。它尝试理解你记得的那个镜头，而不只是要求你想起准确标题。
+          <p class="hero-description" data-i18n="heroDescription">
+            Enhanced index 将增强你的bilibili和YouTube搜索的搜索引擎
           </p>
 
           <div class="hero-actions">
-            <div class="platform-actions" aria-label="选择视频平台">
+            <div class="platform-actions" aria-label="选择视频平台" data-i18n-aria-label="platformChoiceLabel">
               <a
                 class="primary-button bilibili-button"
                 href="https://www.bilibili.com/"
                 target="_blank"
                 rel="noreferrer"
               >
-                <span>哔哩哔哩</span>
+                <span data-i18n="bilibili">哔哩哔哩</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
@@ -55,26 +62,26 @@
                 target="_blank"
                 rel="noreferrer"
               >
-                <span>YouTube</span>
+                <span data-i18n="youtube">YouTube</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </a>
             </div>
             <p class="install-note">
-              <span aria-hidden="true">✓</span>
-              扩展已成功安装
+              <span aria-hidden="true" data-i18n="installCheck">✓</span>
+              <strong data-i18n="installSuccess">扩展已成功安装</strong>
             </p>
           </div>
         </div>
       </section>
       <section class="issues" id="issues" aria-labelledby="issues-title">
-        <div class="section-index" aria-hidden="true">02</div>
+        <div class="section-index" aria-hidden="true" data-i18n="issueSectionNumber">02</div>
 
         <div class="issues-copy">
-          <p class="eyebrow"><span>02</span> 问题反馈</p>
-          <h2 id="issues-title">遇到问题？告诉我们</h2>
-          
+          <p class="eyebrow"><span data-i18n="issueSectionNumber">02</span> <strong data-i18n="issueEyebrow">问题反馈</strong></p>
+          <h2 id="issues-title" data-i18n="issueTitle">遇到问题？告诉我们</h2>
+
         </div>
 
         <div class="issue-card">
@@ -84,23 +91,23 @@
                 <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.69c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.57 9.57 0 0 1 12 6.7c.85 0 1.71.12 2.51.34 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .26.18.58.69.48A10 10 0 0 0 12 2Z" />
               </svg>
             </div>
-          </div>       
-          
+          </div>
+
           <a class="issue-button" href="https://github.com/TaTaloye/Enhanced-index/issues" target="_blank" rel="noreferrer">
-            <span>Issue</span>
+            <span data-i18n="issueButton">Issue</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </a>
-        
+
         </div>
       </section>
     </main>
 
     <footer>
-      <p>ENHANCED INDEX</p>
-      <p>TaTaloye · 2026</p>
+      <p data-i18n="footerBrand">ENHANCED INDEX</p>
+      <p data-i18n="footerCredit">TaTaloye · 2026</p>
     </footer>
-
+  <script src="option.js" type="module"></script>
   </body>
 </html>
