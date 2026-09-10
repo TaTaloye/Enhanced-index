@@ -8,7 +8,7 @@ const translations = {
     brandHomeLabel: "Enhanced index home",
     brandName: "Enhanced index",
     languageSwitchLabel: "Interface language",
-    languageChinese: "Chinese",
+    languageChinese: "中文",
     languageEnglish: "English",
     thanksForUsing: "Thanks for using Enhanced index",
     heroTitle: "Search beyond titles",
@@ -51,3 +51,21 @@ const translations = {
     footerCredit: "TaTaloye · 2026",
   },
 };
+function optionsLanguage(language){
+  return normallanguage.has(language) ? language : "en";
+} 
+const normallanguage = new Set(['en', 'zh-CN']);
+function weblanguage_en(key){
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+  const key = el.dataset.i18n;
+  el.textContent = translations[optionsLanguage("en")][key];
+}); 
+}
+function weblanguage_zh(key){
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+  const key = el.dataset.i18n;
+  el.textContent = translations[optionsLanguage("zh-CN")][key];
+});
+  
+}
+  

@@ -72,24 +72,49 @@ footer {
 .option-language {
   min-height: 34px;
   padding: 0 15px;
-  color: rgba(255, 255, 255, 0.76);
-  border: 0;
+  color: rgba(255, 255, 255, 0.88);
+  border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   font: inherit;
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  transition: color 160ms ease, background 160ms ease;
+  transition: color 160ms ease, background 160ms ease,
+    border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
 }
 
 .option-language[aria-pressed="true"] {
-  color: var(--ink);
+  color: var(--klein-deep);
+  background: var(--ai-green-bright);
+  border-color: var(--ai-green-bright);
+  box-shadow: 0 2px 5px rgba(0, 29, 108, 0.2);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.option-language:hover:not([aria-pressed="true"]):not(:focus) {
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Focus provides interaction feedback, not confirmation of a language change. */
+.option-language:focus {
+  color: var(--klein-deep);
+  background: var(--ai-green);
+  border-color: var(--ai-green-bright);
+  box-shadow: inset 0 0 0 1px var(--ai-green-bright);
+}
+
+.option-language[aria-pressed="true"]:focus {
   background: var(--ai-green-bright);
 }
 
-.option-language:hover:not([aria-pressed="true"]) {
-  color: var(--white);
+.option-language:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 4px rgba(0, 29, 108, 0.22);
 }
 
 .option-language:focus-visible {
