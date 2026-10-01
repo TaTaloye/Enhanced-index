@@ -2,13 +2,31 @@
   "manifest_version": 3,
   "name": "VideoScope",
   "version": "0.1.0",
-  "description": "Search Bilibili and YouTube by descriptions, visual scenes, and spoken keywords.",
-  "permissions": [],
+  "description": "在哔哩哔哩网页中按时长和卡片播放量筛选已加载的视频。",
+  "permissions": [
+    "storage"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.bilibili.com/*",
+        "https://search.bilibili.com/*"
+      ],
+      "js": [
+        "bilibili-data.js",
+        "bilibili-content.js"
+      ],
+      "css": [
+        "bilibili-content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
 }

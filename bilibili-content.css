@@ -1,0 +1,84 @@
+/* 所有面板样式只作用于自己的根节点，不改 B 站按钮或输入框。 */
+[data-ei-bili-hidden="true"] { display: none !important; }
+
+#ei-bili-root {
+  all: initial;
+  position: fixed;
+  inset: 0 auto auto 0;
+  width: 0;
+  height: 0;
+  z-index: 2147483000;
+  color: #20372b;
+  font: 13px/1.6 "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+#ei-bili-root *, #ei-bili-root *::before, #ei-bili-root *::after { box-sizing: border-box; }
+#ei-bili-root [hidden] { display: none !important; }
+#ei-bili-root button, #ei-bili-root input, #ei-bili-root select { font: inherit; }
+#ei-bili-root button { cursor: pointer; }
+#ei-bili-toggle {
+  position: fixed;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #8eba9f;
+  border-radius: 50%;
+  background: #a8d5ba;
+  color: #002fa7;
+  box-shadow: 0 2px 6px #143b2514;
+  transition: background-color 150ms, color 150ms;
+}
+#ei-bili-toggle:hover, #ei-bili-toggle[aria-expanded="true"] { background: #002fa7; color: #fff; border-color: #002fa7; }
+#ei-bili-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+#ei-bili-toggle circle { fill: #a8d5ba; }
+#ei-bili-toggle .ei-active-dot { display: none; position: absolute; right: 0; top: 0; width: 8px; height: 8px; border: 2px solid #fff; border-radius: 50%; background: #002fa7; }
+#ei-bili-root[data-active] .ei-active-dot { display: block; }
+
+#ei-bili-panel {
+  position: fixed;
+  overflow: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid #c9d7ce;
+  border-radius: 12px;
+  background: #fbfcf8;
+  box-shadow: 0 12px 40px #143b2526;
+  color: #20372b;
+  text-align: left;
+  line-height: 1.6;
+}
+#ei-bili-root .ei-heading-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+#ei-bili-heading { margin: 0; color: #002fa7; font-size: 16px; font-weight: 650; line-height: 1.5; }
+#ei-bili-root .ei-close { width: 28px; height: 28px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: #647068; font-size: 23px; line-height: 1; }
+#ei-bili-root .ei-close:hover { background: #e7eee7; }
+#ei-bili-root form, #ei-bili-root fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+#ei-bili-root fieldset { margin-bottom: 16px; }
+#ei-bili-root legend, #ei-bili-root .ei-quality-label { display: block; padding: 0; margin: 0 0 8px; color: #20372b; font-size: 13px; font-weight: 600; }
+#ei-bili-root .ei-range { display: grid; grid-template-columns: minmax(0,1fr) 14px minmax(0,1fr); align-items: end; gap: 8px; }
+#ei-bili-root .ei-range label { display: block; min-width: 0; font-size: 11px; color: #596a60; }
+#ei-bili-root .ei-range label span { display: block; margin-bottom: 4px; }
+#ei-bili-root .ei-range-dash { padding-bottom: 8px; color: #78867d; text-align: center; }
+#ei-bili-root .ei-range input, #ei-bili-root select {
+  display: block; width: 100%; height: 38px; min-width: 0; margin: 0; padding: 7px 10px;
+  border: 1px solid #b9cbbf; border-radius: 5px; outline: none;
+  background: #fff; color: #20372b; font-size: 13px; line-height: 1.5;
+}
+#ei-bili-root input::placeholder { color: #829086; opacity: 1; }
+#ei-bili-root input[aria-invalid="true"] { border-color: #ad3030; }
+#ei-bili-root select:disabled { color: #68766c; background: #edf1eb; cursor: not-allowed; opacity: 1; }
+#ei-bili-root .ei-help { margin: 6px 0 0; color: #637468; font-size: 11px; line-height: 1.6; }
+#ei-bili-root .ei-unknown { display: flex; align-items: flex-start; gap: 7px; margin-top: 16px; color: #52665a; font-size: 11px; cursor: pointer; }
+#ei-bili-root .ei-unknown input { flex: 0 0 auto; appearance: auto; width: 14px; height: 14px; margin: 2px 0 0; accent-color: #002fa7; }
+#ei-bili-error { margin: 12px 0 0; color: #ad3030; font-size: 12px; }
+#ei-bili-root .ei-actions { display: flex; gap: 10px; margin-top: 18px; }
+#ei-bili-root .ei-actions button { min-height: 38px; padding: 7px 13px; border: 1px solid #b9cbbf; border-radius: 5px; font-size: 12px; font-weight: 600; }
+#ei-bili-root .ei-reset { color: #3e5b4b; background: transparent; }
+#ei-bili-root .ei-apply { flex: 1; color: #fff; background: #002fa7; border-color: #002fa7 !important; }
+#ei-bili-root .ei-apply:hover { background: #002477; }
+#ei-bili-status { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid #d9e2d8; color: #31593f; font-size: 11px; }
+#ei-bili-root .ei-scope { margin: 6px 0 0; color: #738176; font-size: 10px; }
+#ei-bili-root button:focus-visible, #ei-bili-root input:focus-visible { outline: 2px solid #002fa7; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { #ei-bili-root * { transition: none !important; } }
