@@ -4,8 +4,35 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const context = vm.createContext({ URL });
-vm.runInContext(fs.readFileSync(path.join(__dirname, "../bilibili-data.js"), "utf8"), context);
-const api = context.EnhancedIndexBilibili;
+vm.runInContext(fs.readFileSync(path.join(__dirname, "../video-data.js"), "utf8"), context);
+const api = context.EnhancedIndex;
+
+test("YouTube 中英文播放量，不把日期、直播人数当播放量", () => {
+  for (const [text,n] of [["1.5M views",1500000],["1 view",1],["No views",0],["969万",9690000],["1.2萬次觀看",12000],["观看次数：1万",null],["1,234 views",1234],["暂无观看次数",0]]) assert.equal(api.parseViews(text),n,text);
+  for (const text of ["2 years ago","3个月前","1.2K watching","1,2 Mio. Aufrufe","2万正在观看","LIVE"]) assert.equal(api.parseViews(text),null,text);
+});
+test("只有明确的平台画质标识才归类；标题/HDR/缺失标识不能推断 SD", () => {
+  for (const badge of ["HD","4K","8K","1080p"]) assert.equal(api.qualityFromBadges([badge]),"hd");
+  assert.equal(api.qualityFromBadges(["SD"]),"sd");
+  for (const badges of [[],["HDR"],["4K旅行"],["CC"],["高清演示"]]) assert.equal(api.qualityFromBadges(badges),null);
+});
+test("HD/SD 两项默认不限，单选时遵守未知信息策略", () => {
+  const hd=api.validateSettings({...api.defaultSettings(),sd:false}).rules;
+  const base={durationSeconds:10,viewCount:100};
+  assert.equal(api.evaluateVideo({...base,quality:"hd"},hd).visible,true);
+  assert.equal(api.evaluateVideo({...base,quality:"sd"},hd).visible,false);
+  assert.equal(api.evaluateVideo({...base,quality:null},hd).visible,true);
+  assert.equal(api.evaluateVideo({...base,quality:null},{...hd,keepUnknown:false}).visible,false);
+  const sd={...hd,hd:false,sd:true};
+  assert.equal(api.evaluateVideo({...base,quality:"hd"},sd).visible,false);
+  assert.equal(api.evaluateVideo({...base,quality:"sd"},sd).visible,true);
+  assert.ok(api.validateSettings({...api.defaultSettings(),hd:false,sd:false}).error);
+  assert.equal(api.validateSettings({maxDuration:"10:00"}).values.hd,true);
+});
+test("YouTube 仅搜索结果页生效，不处理首页或观看页", () => {
+  assert.equal(api.isSearchPage(new URL("https://www.youtube.com/results?search_query=test")),true);
+  for(const url of ["https://www.youtube.com/","https://www.youtube.com/watch?v=abcdefghijk","https://m.youtube.com/results","https://youtube.com.evil.test/results"]) assert.equal(api.isSearchPage(new URL(url)),false);
+});
 
 test("时长：分钟、小时、全角冒号和长合集", () => {
   for (const [text, expected] of [["00:00", 0], ["08:25", 505], ["01:02:03", 3723], ["90:00", 5400], ["60:10:24", 216624], ["００：１０", 10]]) {

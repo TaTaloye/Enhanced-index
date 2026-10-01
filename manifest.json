@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "VideoScope",
-  "version": "0.1.0",
-  "description": "在哔哩哔哩网页中按时长和卡片播放量筛选已加载的视频。",
+  "version": "0.2.0",
+  "description": "筛选哔哩哔哩和 YouTube 搜索页已加载的视频：时长、卡片播放量，以及可识别的 HD / SD 画质标识。",
   "permissions": [
     "storage"
   ],
@@ -17,14 +17,15 @@
     {
       "matches": [
         "https://www.bilibili.com/*",
-        "https://search.bilibili.com/*"
+        "https://search.bilibili.com/*",
+        "https://www.youtube.com/*"
       ],
       "js": [
-        "bilibili-data.js",
-        "bilibili-content.js"
+        "video-data.js",
+        "content.js"
       ],
       "css": [
-        "bilibili-content.css"
+        "content.css"
       ],
       "run_at": "document_idle"
     }

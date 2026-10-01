@@ -1,9 +1,10 @@
-// B 站页面里的工作人员：放按钮、收集条件、调用数据读取器、隐藏不符合条件的卡片。
+// 页面交互层：两平台共用按钮、面板和筛选流程。
 (() => {
   "use strict";
-  const data = globalThis.EnhancedIndexBilibili;
-  const ROOT_ID = "ei-bili-root";
-  const STORAGE_KEY = "ei.bilibili.filters.v1";
+  const data = globalThis.EnhancedIndex;
+  const ROOT_ID = "ei-video-root";
+  // 保留 B 站旧版存储键，YouTube 的条件单独保存。
+  const STORAGE_KEY = "ei." + data?.PLATFORM + ".filters.v1";
   if (!data || document.getElementById(ROOT_ID)) return;
 
   let settings = data.defaultSettings();
@@ -20,16 +21,16 @@
   root.lang = "zh-CN";
   // 只有我们自己写的固定模板使用 innerHTML；网页数据只用 textContent。
   root.innerHTML = `
-    <button type="button" id="ei-bili-toggle" aria-label="视频筛选" title="视频筛选"
-      aria-expanded="false" aria-controls="ei-bili-panel" hidden>
+    <button type="button" id="ei-video-toggle" aria-label="视频筛选" title="视频筛选"
+      aria-expanded="false" aria-controls="ei-video-panel" hidden>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/>
         <circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/></svg>
       <span class="ei-active-dot" aria-hidden="true"></span>
     </button>
-    <section id="ei-bili-panel" role="dialog" aria-labelledby="ei-bili-heading" hidden>
-      <div class="ei-heading-row"><h2 id="ei-bili-heading">视频筛选</h2>
+    <section id="ei-video-panel" role="dialog" aria-labelledby="ei-video-heading" hidden>
+      <div class="ei-heading-row"><h2 id="ei-video-heading">视频筛选</h2>
         <button type="button" class="ei-close" aria-label="关闭筛选面板">×</button></div>
-      <form id="ei-bili-form" novalidate>
+      <form id="ei-video-form" novalidate>
         <fieldset><legend>视频时长</legend>
           <div class="ei-range">
             <label><span>最短</span><input name="minDuration" placeholder="00:00" maxlength="20" autocomplete="off" aria-describedby="ei-duration-help"></label>
@@ -46,29 +47,37 @@
           </div>
           <p class="ei-help" id="ei-views-help">按卡片显示值比较，例如 1.2万按 12000 计算。</p>
         </fieldset>
-        <label class="ei-quality-label" for="ei-bili-quality">最高画质</label>
-        <select id="ei-bili-quality" disabled aria-describedby="ei-quality-help"><option>暂不支持筛选</option></select>
-        <p class="ei-help" id="ei-quality-help">搜索卡片未提供可靠的最高画质，暂不据此过滤。</p>
-        <label class="ei-unknown"><input name="keepUnknown" type="checkbox" checked>保留时长或播放量信息不全的视频</label>
-        <p id="ei-bili-error" role="alert" hidden></p>
+        <fieldset class="ei-quality" aria-describedby="ei-quality-help"><legend>视频画质</legend>
+          <div class="ei-quality-choices">
+            <label><input name="hd" type="checkbox" checked><span>HD</span></label>
+            <label><input name="sd" type="checkbox" checked><span>SD</span></label>
+          </div>
+          <p class="ei-help" id="ei-quality-help"></p>
+        </fieldset>
+        <label class="ei-unknown"><input name="keepUnknown" type="checkbox" checked>保留筛选信息不全的视频（含未知画质）</label>
+        <p id="ei-video-error" role="alert" hidden></p>
         <div class="ei-actions"><button type="button" class="ei-reset">恢复全部</button><button type="submit" class="ei-apply">应用筛选</button></div>
       </form>
-      <p id="ei-bili-status" role="status" aria-live="polite"></p>
-      <p class="ei-scope">仅筛选综合 / 视频搜索页中已加载的普通视频，保留 B 站原有顺序。</p>
+      <p id="ei-video-status" role="status" aria-live="polite"></p>
+      <p class="ei-scope">仅筛选搜索页已加载的普通视频，保留平台原有顺序；不处理直播、Shorts 或播放列表。</p>
     </section>`;
   document.body.append(root);
 
-  const toggle = root.querySelector("#ei-bili-toggle");
-  const panel = root.querySelector("#ei-bili-panel");
+  const toggle = root.querySelector("#ei-video-toggle");
+  const panel = root.querySelector("#ei-video-panel");
   const form = root.querySelector("form");
-  const status = root.querySelector("#ei-bili-status");
-  const errorBox = root.querySelector("#ei-bili-error");
+  const status = root.querySelector("#ei-video-status");
+  const errorBox = root.querySelector("#ei-video-error");
+  const isYouTube = data.PLATFORM === "youtube";
+  root.querySelector("#ei-quality-help").textContent = isYouTube
+    ? "都选中表示不限。只识别平台画质标识：HD / 4K / 8K 归为 HD，SD 归为 SD；未标注为未知，不代表 SD。"
+    : "都选中表示不限。B 站卡片未提供可靠的最高画质，目前均为未知；单选画质仍按下方未知信息开关处理。";
 
   function fillForm() {
     for (const key of ["minDuration", "maxDuration", "minViews", "maxViews"]) {
       form.elements.namedItem(key).value = settings[key];
     }
-    form.elements.namedItem("keepUnknown").checked = settings.keepUnknown;
+    for (const key of ["hd", "sd", "keepUnknown"]) form.elements.namedItem(key).checked = settings[key];
   }
 
   function closePanel(returnFocus = false) {
@@ -86,10 +95,13 @@
 
   function findAnchor() {
     // 搜索页优先使用大搜索框；首页/视频页使用导航栏搜索框。
-    for (const selector of [".search-input-el", ".nav-search-input", "#search-keyword"]) {
+    const selectors = isYouTube ? ['input[name="search_query"]', 'ytd-searchbox input#search']
+      : [".search-input-el", ".nav-search-input", "#search-keyword"];
+    for (const selector of selectors) {
       for (const input of document.querySelectorAll(selector)) {
         if (!isVisible(input)) continue;
-        return input.closest(".search-input-wrap, #nav-searchform, .nav-search-form, .searchform")
+        return input.closest(isYouTube ? "yt-searchbox, ytd-searchbox, .ytSearchboxComponentHost"
+          : ".search-input-wrap, #nav-searchform, .nav-search-form, .searchform")
           || input.parentElement;
       }
     }
@@ -109,6 +121,13 @@
     const size = 36;
     let left = box.right + 8;
     let top = box.top + (box.height - size) / 2;
+    // YouTube 搜索框右边通常紧挨语音按钮，不能把它盖住。
+    const voice = isYouTube && document.querySelector("#voice-search-button");
+    if (voice && isVisible(voice)) {
+      const voiceBox = voice.getBoundingClientRect();
+      if (left < voiceBox.right && left + size > voiceBox.left &&
+          top < voiceBox.bottom && top + size > voiceBox.top) left = voiceBox.right + 8;
+    }
     // 狭窄窗口里放在搜索框右下方，避免盖住搜索按钮。
     if (left + size > innerWidth - 12) {
       left = Math.max(12, Math.min(box.right - size, innerWidth - size - 12));
@@ -132,14 +151,14 @@
   }
 
   function hasFilters() {
-    return ["minDuration", "maxDuration", "minViews", "maxViews"].some(key => rules[key] !== null);
+    return !rules.hd || !rules.sd || ["minDuration", "maxDuration", "minViews", "maxViews"].some(key => rules[key] !== null);
   }
 
   function setHidden(target, hidden) {
     if (hidden) {
-      if (target.getAttribute("data-ei-bili-hidden") !== "true") target.setAttribute("data-ei-bili-hidden", "true");
+      if (target.getAttribute("data-ei-video-hidden") !== "true") target.setAttribute("data-ei-video-hidden", "true");
     } else {
-      target.removeAttribute("data-ei-bili-hidden");
+      target.removeAttribute("data-ei-video-hidden");
     }
   }
 
@@ -160,18 +179,20 @@
     if (!data.isSearchPage()) {
       for (const target of touchedTargets) setHidden(target, false);
       touchedTargets.clear();
-      updateStatus("条件可在这里填写，进入 B 站综合或视频搜索结果页后生效。");
+      updateStatus(isYouTube ? "条件可在这里填写，进入 YouTube 搜索结果页后生效。"
+        : "条件可在这里填写，进入 B 站综合或视频搜索结果页后生效。");
       return;
     }
 
     const nextTargets = new Set();
-    let total = 0, visible = 0, unknownKept = 0, unreadable = 0;
+    let total = 0, visible = 0, unknownKept = 0, unreadable = 0, qualityUnknown = 0;
     for (const card of document.querySelectorAll(data.CARD_SELECTOR)) {
       const video = data.readCard(card);
       if (!video) { unreadable++; continue; }
       const target = data.cardTarget(card);
       if (nextTargets.has(target)) continue;
       nextTargets.add(target);
+      if ((!rules.hd || !rules.sd) && video.quality === null) qualityUnknown++;
       const result = data.evaluateVideo(video, rules);
       setHidden(target, !result.visible);
       total++;
@@ -187,6 +208,7 @@
       ? "已读取 " + total + " 张视频卡片 · 显示 " + visible + " 张 · 隐藏 " + (total - visible) + " 张。"
       : "暂未读取到普通视频卡片，等待结果加载；若页面已有视频，可能需要适配新版页面。";
     if (unknownKept) message += " 其中 " + unknownKept + " 张信息不全，已保留。";
+    if (qualityUnknown) message += " 有 " + qualityUnknown + " 张画质未知，无法确认是否匹配 HD / SD。";
     if (total && !visible) message += " 没有匹配的视频，可以放宽条件或恢复全部。";
     if (unreadable) message += " 未识别的卡片不作处理。";
     updateStatus(message);
@@ -232,7 +254,7 @@
   root.querySelector(".ei-close").addEventListener("click", () => closePanel(true));
   root.addEventListener("click", event => event.stopPropagation());
   root.addEventListener("keydown", event => {
-    event.stopPropagation(); // 不触发 B 站的搜索框快捷键。
+    event.stopPropagation(); // 不触发宿主网站的快捷键。
     if (event.key === "Escape") { event.preventDefault(); closePanel(true); }
   });
   document.addEventListener("pointerdown", event => {
@@ -245,7 +267,7 @@
   form.addEventListener("submit", event => {
     event.preventDefault();
     const values = Object.fromEntries(new FormData(form));
-    values.keepUnknown = form.elements.namedItem("keepUnknown").checked;
+    for (const key of ["hd", "sd", "keepUnknown"]) values[key] = form.elements.namedItem(key).checked;
     const checked = data.validateSettings(values);
     if (checked.error) { showError(checked.error, checked.field); return; }
     edited = true;
@@ -271,8 +293,9 @@
   });
   observer.observe(document.body, {
     childList: true, subtree: true, characterData: true,
-    attributes: true, attributeFilter: ["href", "class"]
+    attributes: true, attributeFilter: ["href", "class", "aria-label", "overlay-style"]
   });
+  document.addEventListener("yt-navigate-finish", () => { closePanel(); scheduleScan(); });
   window.addEventListener("resize", queuePosition);
   window.addEventListener("scroll", queuePosition, { passive: true, capture: true });
   // 网站可能只更改路由，不重新载入文档。
