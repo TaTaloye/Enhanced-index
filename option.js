@@ -11,7 +11,7 @@ const translations = {
     languageChinese: "中文",
     languageEnglish: "English",
     thanksForUsing: "Thanks for using Enhanced-index",
-    heroTitle: "Search beyond titles",
+    heroTitle: "Don't just search titles",
     heroDescription:
       "Enhanced-index improves search on Bilibili and YouTube.",
     platformChoiceLabel: "Choose a video platform",
