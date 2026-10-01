@@ -1,68 +1,49 @@
 # Enhanced-index
 
-Chrome / Edge 视频搜索筛选扩展。支持 **B 站综合、视频搜索页**和 **YouTube 桌面搜索页**。无需提前设置 options.html，无需安装 Node.js 或填写 API Key。
+Filter videos directly on Bilibili and YouTube search pages.
 
-## 怎么用
+**English** · [简体中文](README.zh.md)
 
-1. 在浏览器扩展管理页开启“开发者模式”，加载本项目文件夹。
-2. 更新过代码后，点击扩展的“重新加载”，再刷新 B 站和 YouTube 网页。
-3. 点击搜索栏旁的艾绿色圆形按钮，填写时长、播放量范围，点击“应用筛选”。
-4. 画质只有 HD、SD 两个勾选项：都选中表示不限，单选表示只筛这一类。
-5. “恢复全部”清除条件并还原卡片；Esc 或点击面板外关闭面板。
+## Introduction
 
-时长上下限分开填，如最短 `00:00`、最长 `10:00`；也支持 `01:00:00`。留空表示不限，范围包括边界。
-播放量支持 `10000`、`1.2万`、`1.5K`、`2.3M`；卡片上的 `1.2万` 按 12000 比较，不会还原精确计数。
-条件只保存到浏览器本地，两平台独立保存，原有 B 站条件继续保留。
+Enhanced-index is a Chrome / Edge extension. It adds a small button beside the search bar so you can filter videos by duration, quality, and view count.
+You don't need a build step, API key, AI model, or advance configuration.
 
-## 画质功能的真实范围
+## Getting started
 
-本版是**页面标识筛选**，不是逐个打开视频查询其最高分辨率。
+1. Download and extract the source ZIP from this repository, or clone the repository.
+2. In Chrome, open `chrome://extensions`. In Edge, open `edge://extensions`.
+3. Enable **Developer mode**, click **Load unpacked**, and select the folder containing `manifest.json`.
 
-- YouTube：读取平台徽章中的 HD / 4K / 8K 等高清标识并归为 HD；明确的 SD 标识归为 SD。现实中不少卡片没有画质标识，尤其不能通过“没有 HD”推断 SD。
-- B 站：搜索卡片没有可靠的最高画质字段，所以本版画质均为未知；只有时长和播放量能稳定用于筛选。
-- 默认保留未知信息；取消“保留筛选信息不全的视频”后，需要判断却读不到的字段会使视频被隐藏。因此在 B 站单选 HD 或 SD 再取消保留未知，可能隐藏全部普通视频。面板会提示未知数量。
-- 不从视频标题、封面大小或当前播放分辨率猜最高画质。HD / SD 是分类，不提供 1080p、4K 等最高分辨率筛选。
+The welcome page opens on first installation.
 
-如果以后需要更完整的 YouTube 分类，可选用官方 YouTube Data API 的 `videos.list(part=contentDetails)`，读取 `contentDetails.definition` 的 `hd` / `sd`。这条路线需要 API 凭据和配额；本版没有接入，也不会发送这些请求。
-官方说明：[视频字段](https://developers.google.com/youtube/v3/docs/videos#contentDetails.definition)、[获取视频元数据](https://developers.google.com/youtube/v3/docs/videos/list)。
+After editing the code or downloading an update, reload the extension in the extension manager, then refresh the video site's tab.
 
-### 为什么 B 站最高画质没有实现？
+The duration fields expand whole numbers from **1 to 59** into minutes when you leave the field or apply the form. This doesn't happen after each keystroke. Full-width digits such as `１０` also work. Bare `0`, `60`, negative numbers, and decimals are not valid shortcuts; use a full duration such as `00:00` or `60:00` instead.
 
-现在的扩展像“看搜索结果卡片的眼睛”：卡片写了时长、播放量，但没有写这个视频最高能播多少 P。
-要补齐，需要单独查询播放器/视频详情相关数据，并验证得到的是视频源支持的画质还是当前账号可播放的画质；还要处理权限、接口变化、失败和请求数量。
-所以不是 JavaScript 做不到，而是目前的零配置、只读卡片方案缺少可靠来源。不能为了让筛选器看起来有效，就把未知当成 SD。
+### Tips
 
-## 每个文件做什么
+- View counts use the approximation shown on the card: `1.2万` counts as 12,000. The extension cannot recover the exact count that the card doesn't show.
+- Select both **HD** and **SD** for no quality restriction. Keep at least one selected.
+- Explicit YouTube badges such as HD, 4K, and 8K count as HD; an explicit SD badge counts as SD. A title containing "4K" doesn't establish the video's quality.
+- **保留筛选信息不全的视频** (Keep videos with missing filter data) is on by default. If a field needed for filtering is unknown, the extension keeps the card. A known value outside your range still causes it to hide the card.
+- **恢复全部** (Reset) clears all conditions and restores the cards. Press Esc or click outside the panel to close it.
 
-| 文件 | 职责 |
-| --- | --- |
-| `manifest.json` | 告诉浏览器在 B 站、YouTube 加载哪些脚本；声明本地存储权限。 |
-| `video-data.js` | 数据读取器：识别平台、读取卡片、换算时长/播放量、识别明确画质标识、判断匹配。 |
-| `content.js` | 圆形按钮与下拉面板；收集条件、显示/隐藏卡片、响应懒加载和页面切换、保存条件。 |
-| `content.css` | 两个平台共用的按钮和面板样式。 |
-| `background.js` | 首次安装时打开欢迎页，不查询视频接口。 |
-| `options.html` / `options.css` / `option.js` | 欢迎页、简化后的反馈区和原有语言文本逻辑，不用于预设筛选。 |
-| `tests/video-data.test.cjs` | 不依赖第三方包的数据层测试。 |
+## Known limitations
 
-旧的 `bilibili-data.js`、`bilibili-content.js`、`bilibili-content.css` 和测试文件已改为平台无关的名字。
+- The extension filters only loaded search cards it can recognize. It doesn't search the entire platform, fetch additional pages, or change the result order.
+- Shorts, playlists, live streams, non-video entries, and unrecognized content fall outside the supported scope. They may remain visible.
+- YouTube may load a card's duration later. The extension treats unreadable values as unknown and reapplies filters once they become available. It doesn't guess at number formats it cannot parse.
+- Bilibili cards don't provide a reliable maximum-quality field to the current reader. Selecting only HD or SD and turning off "keep unknown" may hide all recognized Bilibili videos.
+- Complete quality lookup needs an additional metadata source that has been checked for reliability. This version doesn't call video or player APIs.
+- Site layout changes can break the selectors for cards and search bars. Include a reproducible example when reporting a problem.
 
-数据流程：面板条件 → `validateSettings()` 校验 → `readCard()` 读取卡片 → `evaluateVideo()` 判断 → `scanCards()` 显示或隐藏。
+## Privacy and permissions
 
-## 支持范围与隐私
+The extension requests `storage` to save filter preferences and runs content scripts on `www.bilibili.com`, `search.bilibili.com`, and `www.youtube.com`.
 
-- 只筛选当前页面已加载的普通视频，保留平台原有顺序；不会自动翻页，也不代表搜索了整个平台。
-- 处理动态加载、换关键词、卡片内容更新、YouTube 单页导航。首页和播放页可以填写条件，但不隐藏推荐视频。
-- 不处理 YouTube Shorts、播放列表、直播；不处理 B 站番剧、用户、非普通视频入口；不能识别的卡片保持原状。
-- YouTube 播放量解析支持中文和英文；其他语言无法明确读取时按未知处理。
-- 仅使用 `storage` 与 manifest 指定的网站内容脚本范围；不读取 Cookie、不上传浏览历史、不调用视频 API。
-- 平台改版可能需要维护选择器；时长尚未懒加载出来时同样按未知处理。
+Preferences stay in the browser's local extension storage. The code doesn't read cookies, upload browsing history, collect usage statistics, or send video metadata to a server. Filtering reads the current page and changes card visibility. The welcome page and its external links are separate from the filtering logic.
 
-## 开发检查
+## License
 
-使用扩展不需要 Node.js；开发者测试时运行：
-
-```sh
-node --test tests/video-data.test.cjs
-```
-
-覆盖时间/播放量换算、区间边界、无效输入、旧条件兼容、HD/SD 与未知值策略、两平台路由范围。
+[MIT](LICENSE). The license file retains its original copyright notices.

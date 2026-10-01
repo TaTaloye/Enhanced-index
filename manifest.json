@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "VideoScope",
+  "name": "Enhanced-index",
   "version": "0.2.0",
   "description": "筛选哔哩哔哩和 YouTube 搜索页已加载的视频：时长、卡片播放量，以及可识别的 HD / SD 画质标识。",
   "permissions": [

@@ -9,6 +9,13 @@
   const CARD_SELECTOR = SELECTORS[PLATFORM];
   const normalizeText = value => String(value ?? "").normalize("NFKC").trim();
 
+  // 只补全用户输入；卡片里的纯数字仍不能当作分钟，防止误读。
+  function normalizeDurationInput(value) {
+    const text = normalizeText(value);
+    return /^(?:0?[1-9]|[1-5][0-9])$/.test(text)
+      ? String(Number(text)).padStart(2, "0") + ":00" : text;
+  }
+
   function parseDuration(value) {
     const text = normalizeText(value).replace(/\s/g, "");
     if (!/^\d+:\d{1,2}(?::\d{1,2})?$/.test(text)) return null;
@@ -47,11 +54,11 @@
     const values = defaultSettings();
     const rules = {};
     for (const key of ["minDuration", "maxDuration", "minViews", "maxViews"]) {
-      values[key] = normalizeText(input[key]);
+      values[key] = key.includes("Duration") ? normalizeDurationInput(input[key]) : normalizeText(input[key]);
       const parser = key.includes("Duration") ? parseDuration : parseViews;
       rules[key] = values[key] === "" ? null : parser(values[key]);
       if (values[key] !== "" && rules[key] === null) return {
-        error: key.includes("Duration") ? "时长请填写 分:秒 或 时:分:秒，例如 10:00；秒数须小于 60。"
+        error: key.includes("Duration") ? "时长请填写 1–59 的整数分钟，或 分:秒 / 时:分:秒，例如 10:00；秒数须小于 60。"
           : "播放量请填写整数或带单位的数字，例如 10000、1.2万、1.5M。", field: key
       };
     }
@@ -85,8 +92,6 @@
     }
     return null;
   }
-
-  // 仅用于网站提供的画质徽章。绝不能把整个标题传进来猜画质。
   function qualityFromBadges(labels) {
     const text = labels.map(value => normalizeText(value).toUpperCase());
     if (text.some(value => /^(HD|4K|8K|720P|1080P|1440P|2160P|4320P)$/.test(value))) return "hd";
@@ -151,5 +156,5 @@
   }
 
   globalThis.EnhancedIndex = Object.freeze({ PLATFORM, CARD_SELECTOR, parseDuration, parseViews, defaultSettings,
-    validateSettings, readCard, cardTarget, evaluateVideo, isSearchPage, qualityFromBadges });
+    validateSettings, readCard, cardTarget, evaluateVideo, isSearchPage, qualityFromBadges, normalizeDurationInput });
 })();

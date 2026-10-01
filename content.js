@@ -19,7 +19,7 @@
   const root = document.createElement("div");
   root.id = ROOT_ID;
   root.lang = "zh-CN";
-  // 只有我们自己写的固定模板使用 innerHTML；网页数据只用 textContent。
+  
   root.innerHTML = `
     <button type="button" id="ei-video-toggle" aria-label="视频筛选" title="视频筛选"
       aria-expanded="false" aria-controls="ei-video-panel" hidden>
@@ -37,7 +37,7 @@
             <span class="ei-range-dash" aria-hidden="true">—</span>
             <label><span>最长</span><input name="maxDuration" placeholder="10:00" maxlength="20" autocomplete="off" aria-describedby="ei-duration-help"></label>
           </div>
-          <p class="ei-help" id="ei-duration-help">分:秒，或 时:分:秒；留空表示不限。</p>
+          <p class="ei-help" id="ei-duration-help">输入 1–59 自动补为分钟，如 10 → 10:00；也可填 分:秒 / 时:分:秒，留空不限。</p>
         </fieldset>
         <fieldset><legend>播放量</legend>
           <div class="ei-range">
@@ -179,8 +179,8 @@
     if (!data.isSearchPage()) {
       for (const target of touchedTargets) setHidden(target, false);
       touchedTargets.clear();
-      updateStatus(isYouTube ? "条件可在这里填写，进入 YouTube 搜索结果页后生效。"
-        : "条件可在这里填写，进入 B 站综合或视频搜索结果页后生效。");
+      updateStatus(isYouTube ? ""
+        : "");
       return;
     }
 
@@ -264,8 +264,23 @@
     if (!panel.hidden && !root.contains(event.target)) closePanel();
   });
 
+  function normalizeDurationFields() {
+    for (const key of ["minDuration", "maxDuration"]) {
+      const input = form.elements.namedItem(key);
+      input.value = data.normalizeDurationInput(input.value);
+    }
+  }
+
+  form.addEventListener("focusout", event => {
+    const input = event.target;
+    if (input.name === "minDuration" || input.name === "maxDuration") {
+      input.value = data.normalizeDurationInput(input.value);
+    }
+  });
+
   form.addEventListener("submit", event => {
     event.preventDefault();
+    normalizeDurationFields(); // Enter 或程序提交时也补全，不依赖是否触发失焦。
     const values = Object.fromEntries(new FormData(form));
     for (const key of ["hd", "sd", "keepUnknown"]) values[key] = form.elements.namedItem(key).checked;
     const checked = data.validateSettings(values);

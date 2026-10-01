@@ -1,4 +1,4 @@
-/* 样式只作用于扩展面板，以及明确被筛掉的卡片。 */
+/* 样式只作用于扩展面板 */
 [data-ei-video-hidden="true"] { display: none !important; }
 
 #ei-video-root {
